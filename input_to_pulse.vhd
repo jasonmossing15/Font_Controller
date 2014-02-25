@@ -33,7 +33,6 @@ entity input_to_pulse is
     Port ( clk : in  STD_LOGIC;
            reset : in  STD_LOGIC;
            input : in  STD_LOGIC;
-			  LED : out STD_logic;
            pulse : out  STD_LOGIC);
 end input_to_pulse;
 
@@ -113,16 +112,13 @@ dcount_next <= dcount_reg + 1 when p_state_reg = debounce and rising_edge(clk) e
 	begin
 		if (reset = '1') then
 			pulse_reg <= '0';
-			ledsig <= '0';
 		elsif rising_edge(clk) then
 			pulse_reg <= pulse_next;
-			ledsig <= leds;
 		end if;
 	end process;
 
 
 pulse <= pulse_reg;
-LED <= ledsig;
 
 end Behavioral;
 
@@ -191,12 +187,10 @@ inp_temp <= in2 when dcount_reg > 50000 else
 	process(p_state_reg)
 	begin
 		pulse_next <= '0';
-		leds <= ledsig;
 		
 		case p_state_reg is
 			when pressed =>
 				pulse_next <= '1';
-				leds <= not ledsig;
 			when held =>
 			when idle =>
 		end case;
@@ -207,16 +201,13 @@ inp_temp <= in2 when dcount_reg > 50000 else
 	begin
 		if (reset = '1') then
 			pulse_reg <= '0';
-			ledsig <= '0';
 		elsif rising_edge(clk) then
 			pulse_reg <= pulse_next;
-			ledsig <= leds;
 		end if;
 	end process;
 
 
 pulse <= pulse_reg;
-LED <= ledsig;
 
 
 end shiftReg;

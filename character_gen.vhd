@@ -32,6 +32,7 @@ use IEEE.NUMERIC_STD.ALL;
 entity character_gen is
     Port ( clk : in  STD_LOGIC;
            blank : in  STD_LOGIC;
+			  reset : in std_logic;
            row : in  STD_LOGIC_VECTOR (10 downto 0);
            column : in  STD_LOGIC_VECTOR (10 downto 0);
            ascii_to_write : in  STD_LOGIC_VECTOR (7 downto 0);
@@ -62,6 +63,8 @@ architecture Behavioral of character_gen is
 	signal data_out_b, data : std_logic_vector(7 downto 0);
 	signal row_sig, col_sig, col_sig1 : std_logic_vector(10 downto 0);
 	signal pixel : std_logic;
+	signal address : std_logic_vector(13 downto 0);
+	signal count, count_temp : STD_LOGIC_VECTOR (11 downto 0);
 	constant zero : std_logic_vector(7 downto 0) := (others=>'0');
 	
 
@@ -70,19 +73,27 @@ begin
 	 inst_font_rom : font_rom
 	 		port map(
 			clk => clk,
-			addr => data_out_b(7 downto 0) & row_sig(3 downto 0),
+			addr => data_out_b(6 downto 0) & row_sig(3 downto 0),
 			data => data
 		);
 
 	inst_char_screen_buffer : char_screen_buffer
 		Port map ( clk => clk,
 		  we => write_en,
-		  address_a => open,
-		  address_b => open,
+		  address_a => count,
+		  address_b => address(11 downto 0),
 		  data_in => ascii_to_write,
 		  data_out_a => open,
 		  data_out_b => data_out_b
 		  );
+
+count <= std_logic_vector(unsigned(count_temp) + 1) when rising_edge(write_en) else
+			count_temp;
+			
+count_temp <= (others => '0') when reset = '1' else
+					count;
+
+address <= std_logic_vector(unsigned(row(10 downto 4))* 80 + unsigned(column(10 downto 3)));
 
 -- Row DFF
 	Process (clk)
