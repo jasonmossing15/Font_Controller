@@ -25,6 +25,9 @@ entity atlys_lab_video is
              start  : in  std_logic;
              switch : in  std_logic_vector(7 downto 0);
              led    : out std_logic_vector(7 downto 0);
+				 nes_data : in  STD_LOGIC;
+             nes_clk : out  STD_LOGIC;
+             latch : out  STD_LOGIC;
              tmds  : out std_logic_vector(3 downto 0);
              tmdsb : out std_logic_vector(3 downto 0)
          );
@@ -59,9 +62,10 @@ architecture mossing of atlys_lab_video is
 			  reset : in std_logic;
            row : in  STD_LOGIC_VECTOR (10 downto 0);
            column : in  STD_LOGIC_VECTOR (10 downto 0);
-           ascii_to_write : in  STD_LOGIC_VECTOR (7 downto 0);
+          -- ascii_to_write : in  STD_LOGIC_VECTOR (7 downto 0);
            write_en : in  STD_LOGIC;
-           r,g,b : out  STD_LOGIC_VECTOR (7 downto 0));
+           up, down, left, right : in std_logic;
+			  r,g,b : out  STD_LOGIC_VECTOR (7 downto 0));
 	end component;
 	
 --	component input_to_pulse
@@ -72,8 +76,10 @@ architecture mossing of atlys_lab_video is
 --           pulse : out  STD_LOGIC);
 --	end component;
 	 
-	 signal row_sig, column_sig, ball_xs, ball_ys, paddle_ys : unsigned(10 downto 0);
-	 signal button, blank_sig, blank, h_sync, v_sync, blank1, h_sync1, v_sync1, h_sync_sig, v_sync_sig, clock_s, blue_s, green_s, red_s, serialize_clk_n, serialize_clk, pixel_clk, v_completed : std_logic;
+	 signal row_sig, column_sig : unsigned(10 downto 0);
+	 signal button, blank_sig, blank, h_sync, v_sync, blank1, h_sync1, v_sync1, h_sync_sig,
+	 v_sync_sig, clock_s, blue_s, green_s, red_s, serialize_clk_n, serialize_clk, pixel_clk,
+	 v_completed, upsig, downsig, leftsig, rightsig, latchsig : std_logic;
 	 signal red, green, blue : std_logic_vector(7 downto 0);
 begin
 
@@ -109,19 +115,33 @@ begin
 					reset => reset,
 					row => std_logic_vector(row_sig),
 					column => std_logic_vector(column_sig),
-					ascii_to_write => switch,
-					write_en => button,
+					--ascii_to_write => switch,
+					write_en => '1',
+					up => upsig,
+				   down => downsig,
+				   left => leftsig,
+				   right => rightsig,
 					r => red,
 				 	g => green,
 					b => blue
 				  );
 				  
-	inst_input_to_pulse : entity work.input_to_pulse(shiftReg)
-	    Port map ( 
-			  clk => pixel_clk,
-           reset => reset,
-           input => start,
-           pulse => button);
+	inst_nes_controller : entity work.nes_controller
+		port map(
+			  reset => reset,
+           clk => pixel_clk,
+           data => nes_data,
+           nes_clk => nes_clk,
+           latch => latch,
+           a => open,
+			  b => open,
+			  sel => open,
+			  start => open,
+			  up => upsig,
+			  down => downsig,
+			  left => leftsig,
+			  right => rightsig);
+				  
 
 	process(pixel_clk)
 	begin
@@ -196,7 +216,7 @@ begin
 
 LED(7) <= switch(7);
 LED(6) <= switch(6);
---LED(5) <= switch(5);
+LED(5) <= switch(5);
 LED(4) <= switch(4);
 LED(3) <= switch(3);
 LED(2) <= switch(2);
