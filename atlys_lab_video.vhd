@@ -22,7 +22,6 @@ entity atlys_lab_video is
     port ( 
              clk   : in  std_logic; -- 100 MHz
              reset : in  std_logic;
-             start  : in  std_logic;
              switch : in  std_logic_vector(7 downto 0);
              led    : out std_logic_vector(7 downto 0);
 				 nes_data : in  STD_LOGIC;

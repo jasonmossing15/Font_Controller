@@ -128,6 +128,7 @@ architecture shiftReg of input_to_pulse is
 	type button_states is (idle, pressed, held);
 	signal p_state_reg, p_state_next : button_states;
 	signal pulse_reg, pulse_next, inp, inp_temp, in1, in2, ledsig, leds : std_logic;
+	constant shiftdelay : integer := 50000;
 	
 begin
 --Count State Register
@@ -149,7 +150,7 @@ begin
 dcount_next <= dcount_reg + 1 when in1 = in2 else
 				  to_unsigned(0,16);
 				  
-inp_temp <= in2 when dcount_reg > 50000 else
+inp_temp <= in2 when dcount_reg > shiftdelay else
 				inp;
 
 --	State Register

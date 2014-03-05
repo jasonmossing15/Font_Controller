@@ -1,21 +1,8 @@
 ----------------------------------------------------------------------------------
--- Company: 
--- Engineer: 
--- 
+-- Company: ECE383
+-- Engineer: Jason Mossing
 -- Create Date:    13:24:55 02/21/2014 
--- Design Name: 
 -- Module Name:    character_gen - Behavioral 
--- Project Name: 
--- Target Devices: 
--- Tool versions: 
--- Description: 
---
--- Dependencies: 
---
--- Revision: 
--- Revision 0.01 - File Created
--- Additional Comments: 
---
 ----------------------------------------------------------------------------------
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
@@ -26,8 +13,8 @@ use IEEE.NUMERIC_STD.ALL;
 
 -- Uncomment the following library declaration if instantiating
 -- any Xilinx primitives in this code.
---library UNISIM;
---use UNISIM.VComponents.all;
+library UNISIM;
+use UNISIM.VComponents.all;
 
 entity character_gen is
     Port ( clk : in  STD_LOGIC;
@@ -67,6 +54,10 @@ architecture Behavioral of character_gen is
 	signal address : std_logic_vector(13 downto 0);
 	signal count, count_temp : STD_LOGIC_VECTOR (11 downto 0);
 	constant zero : std_logic_vector(7 downto 0) := (others=>'0');
+	constant a : std_logic_vector(7 downto 0) := x"41";
+	constant last : integer :=2399;
+	constant first : integer := 0;
+	constant rowshift : integer := 80;
 	
 
 begin
@@ -88,21 +79,21 @@ begin
 		  data_out_b => data_out_b
 		  );
 
-count <= std_logic_vector(unsigned(count_temp) + 1) when (rightsig = '1' and unsigned(count_temp) < 2399) else
-			std_logic_vector(unsigned(count_temp) - 1) when (leftsig = '1' and unsigned(count_temp) > 0) else
-			count_temp;
+count <= count_temp;
 			
 count_temp <= (others => '0') when reset = '1' else
-					count;
+				  std_logic_vector(unsigned(count) + 1) when rising_edge(rightsig) else
+				  std_logic_vector(unsigned(count) - 1) when rising_edge(leftsig) else
+				  count;
 					
 ascii_to_write <= std_logic_vector(unsigned(ascii_sig) + 1) when upsig = '1' else
 						std_logic_vector(unsigned(ascii_sig) - 1) when downsig = '1' else
 						ascii_sig;
 						
-ascii_sig <= (x"41") when reset = '1' else
+ascii_sig <= (a) when reset = '1' else
 					ascii;
 
-address <= std_logic_vector(unsigned(row(10 downto 4))* 80 + unsigned(column(10 downto 3)));
+address <= std_logic_vector(unsigned(row(10 downto 4))* rowshift + unsigned(column(10 downto 3)));
 
 -- Row DFF
 	Process (clk)
