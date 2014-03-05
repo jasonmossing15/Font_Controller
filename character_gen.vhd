@@ -50,7 +50,7 @@ architecture Behavioral of character_gen is
 	
 	signal data_out_b, data, ascii_to_write, ascii_sig, ascii : std_logic_vector(7 downto 0);
 	signal row_sig, col_sig, col_sig1 : std_logic_vector(10 downto 0);
-	signal pixel, upsig, downsig, rightsig, leftsig : std_logic;
+	signal pixel, upsig, downsig, rightsig, leftsig, uphold, downhold : std_logic;
 	signal address : std_logic_vector(13 downto 0);
 	signal count, count_temp : STD_LOGIC_VECTOR (11 downto 0);
 	constant zero : std_logic_vector(7 downto 0) := (others=>'0');
@@ -79,15 +79,21 @@ begin
 		  data_out_b => data_out_b
 		  );
 
-count <= count_temp;
+process (reset, clk) 
+begin
+	if reset = '1' then
+		count <= (others=> '0');
+	elsif rising_edge(clk) then
+		count <= count_temp;
+	end if;
+end process;
 			
-count_temp <= (others => '0') when reset = '1' else
-				  std_logic_vector(unsigned(count) + 1) when rising_edge(rightsig) else
-				  std_logic_vector(unsigned(count) - 1) when rising_edge(leftsig) else
+count_temp <= std_logic_vector(unsigned(count) + 1) when rightsig = '1' else
+				  std_logic_vector(unsigned(count) - 1) when leftsig = '1' else
 				  count;
 					
-ascii_to_write <= std_logic_vector(unsigned(ascii_sig) + 1) when upsig = '1' else
-						std_logic_vector(unsigned(ascii_sig) - 1) when downsig = '1' else
+ascii_to_write <= std_logic_vector(unsigned(ascii_sig) + 1) when upsig = '1' or uphold = '1' else
+						std_logic_vector(unsigned(ascii_sig) - 1) when downsig = '1' or downhold = '1' else
 						ascii_sig;
 						
 ascii_sig <= (a) when reset = '1' else
@@ -146,18 +152,20 @@ with col_sig1(2 downto 0) select
 		end if;
 	end process;
 			
-	inst_up : entity work.input_to_pulse(shiftReg)
+	inst_up : entity work.input_to_pulse_with_held
 	    Port map ( 
 			  clk => clk,
            reset => reset,
            input => up,
+			  hold => uphold,
            pulse => upsig);
 			  
-	inst_down : entity work.input_to_pulse(shiftReg)
+	inst_down : entity work.input_to_pulse_with_held
 	    Port map ( 
 			  clk => clk,
            reset => reset,
            input => down,
+			  hold => downhold,
            pulse => downsig);
 
 	inst_left : entity work.input_to_pulse(shiftReg)
@@ -176,4 +184,3 @@ with col_sig1(2 downto 0) select
 		
 
 end Behavioral;
-
