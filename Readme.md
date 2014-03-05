@@ -6,15 +6,15 @@ This lab is creating a font controller by using the exsiting atlys lab file, alo
 
 This was implemented by using the existing atlys lab video file and adding a component of character_gen. Inside of character_gen, there are two components: char_screen_buffer and font_rom. Also for B and A functionality there are some input_to_pulse components. In addition to character_gen, in A functionality there is a nes_controller component in order to interface with the nes controller. The following is a visual representation of the component connections for A functionality:
 
-![Overall Connections](Connections.jpg)
+![Overall Connections](connections.JPG)
 
 The character_gen is the only component that needed to be edited, since the other components were given. Character_gen involves three main items: component instantiation, logic for the components, and logic for displaying the characters (equivalent to pixel_gen).
 
-1 the components instantiated are the font_rom, char_screen_buffer, and input_to_pulse.
+1. the components instantiated are the font_rom, char_screen_buffer, and input_to_pulse.
 
-2 The logic for the components involves: concatenation (`addr => data_out_b(6 downto 0) & row_sig(3 downto 0);`), a 8 to 1 mux, D-Flip Flops, and logic for an internal count (B and A functionality)
+2. The logic for the components involves: concatenation (`addr => data_out_b(6 downto 0) & row_sig(3 downto 0);`), a 8 to 1 mux, D-Flip Flops, and logic for an internal count (B and A functionality)
 
-3 The logic for pixel generation is almost identical to the pixel_gen. The pixel being highleted is determined by the 8-to-1 mux.
+3. The logic for pixel generation is almost identical to the pixel_gen. The pixel being highleted is determined by the 8-to-1 mux.
 
 
 B Functionality deals with using the switches and a button in order to change the character. The array of the switches is the std_logic_vector for the ascii_to_write. Then the button is the write_en after it has gone through the input_to_pulse component.
@@ -23,7 +23,7 @@ A Functionality is interfacing with the nes controller. the hardest part is deal
 
 ## Test and Debug
 
-This program was tested by trial and error. When I felt that an effective change was made I generated a new BIT file and tested it. Just like the Pong lab, this was very ineffective what it comes to time spent.
+This program was tested by trial and error. When I felt that an effective change was made I generated a new BIT file and tested it. Just like the Pong lab, this was very ineffective when it comes to time spent.
 
 I ran into two main issues: glitches due to not enough delay and glitches due to moving to the next character.
 
